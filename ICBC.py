@@ -20,7 +20,7 @@ def getRandom():
     li = "0123456789qwertyuiopasdfghjklzxcvbnmZXCVBNMASDFGHJKLQWERTYUIOP"
     global string
     string = ""
-    for i in range(8):
+    for i in range(6):
         string = string + li[int(random.random() * len(li))]
     return string
 
