@@ -21,7 +21,7 @@ def getRandom():
     global string
     string = "6"
     for i in range(18):
-        string = string + li[int(random.random() * len(li))]
+        string = string + li[random.randint(0,9)]
     return string
 
 def bank_useradd(username,password,country,province,street,door,money):
