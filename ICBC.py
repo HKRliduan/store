@@ -17,10 +17,10 @@ def welcome():
     print("-------------------------------------")
 
 def getRandom():
-    li = "0123456789qwertyuiopasdfghjklzxcvbnmZXCVBNMASDFGHJKLQWERTYUIOP"
+    li = "0123456789"
     global string
-    string = ""
-    for i in range(6):
+    string = "6"
+    for i in range(18):
         string = string + li[int(random.random() * len(li))]
     return string
 
