@@ -1,25 +1,9 @@
 import random
-bank ={12345678:{
-    "username":"张三",
-    "password":123456,
-    "country":"中国",
-    "province":"北京",
-    "street":"昌平老牛湾",
-    "tablet":"001",
-    "money":1000,
-    "bank_name":"中国工商银行昌平支行"
-    },87654321:{
-    "username":"李四",
-    "password":123456,
-    "country":"中国",
-    "province":"北京",
-    "street":"昌平老牛湾",
-    "tablet":"002",
-    "money":0,
-    "bank_name":"中国工商银行昌平支行"
-    }
-    }
-bank_name="中国工商银行昌平支行"
+from DBUtils import update
+from DBUtils import select
+
+bank_name = "中国工商银行昌平回龙观支行"
+
 def welcome():
     print("-------------------------------------")
     print("-          中国工商银行昌平支行         -")
@@ -32,36 +16,41 @@ def welcome():
     print("-  6 退出                            -")
     print("-------------------------------------")
 
-def bank_useradd(username,password,country,province,street,tablet,account,money,bank_name):
-    if len(bank)>100:
+def getRandom():
+    li = "0123456789qwertyuiopasdfghjklzxcvbnmZXCVBNMASDFGHJKLQWERTYUIOP"
+    global string
+    string = ""
+    for i in range(8):
+        string = string + li[int(random.random() * len(li))]
+    return string
+
+def bank_useradd(username,password,country,province,street,door,money):
+    sql1 = "select count(*) from user"
+    param1 = []
+    data = select(sql1, param1)
+    if data[0][0] >= 100:
         return 3
-    if username in bank:
+    sql2 = "select * from user where username  = %s"
+    param2 = [username]
+    data2 = select(sql2, param2)
+    if len(data2) != 0:
         return 2
-    bank[account]={
-        "username":username,
-        "password":password,
-        "country":country,
-        "province":province,
-        "street":street,
-        "tablet":tablet,
-        "account":account,
-        "money":money,
-        "bank_name":bank_name
-    }
+    sql3 = "insert into user  values(%s,%s,%s,%s,%s,%s,%s,%s,now(),%s)"
+    param3 = [getRandom(), username, password, country, province, street, door, money, bank_name]
+    update(sql3, param3)
     return 1
 
 def useradd():
     username = input("请输入您的用户名：")
-    password = input("请输入您的密码:")
+    password = int(input("请输入您的密码:"))
     print("下面请输入您的地址")
     country = input("\t\t请输入您的国籍:")
     province = input("\t\t请输入您的省份:")
     street = input("\t\t请输入您的街道:")
-    tablet = input("\t\t请输入您的门牌号: ")
-    account = random.randint(10000000, 99999999)
+    door = input("\t\t请输入您的门牌号: ")
     money = 0
 
-    staus = bank_useradd(username, password, country, province, street, tablet, account, money, bank_name)
+    staus = bank_useradd(username, password, country, province, street,door, money)
     if staus == 3:
         print("对不起，用户库已满。")
     if staus == 2:
@@ -81,55 +70,87 @@ def useradd():
 余额：%s
 开户行地址：%s
                    '''
-        print(info % (username, password, account, country, province, street, tablet, money, bank_name))
-def cunqian():
-    account = int(input("请输入您的账号:"))
-    if account in bank:
-        cun=int(input("请输入要存入的金额："))
-        bank[account]["money"]=int(bank[account]["money"])+cun
-        print("您的余额为：", bank[account]["money"])
+        print(info % (username, password, string, country, province, street, door, money, bank_name))
+def cun_money():
+    account=input("请输入您的账户")
+    sql4="select account from user where account =%s"
+    param4 = [account]
+    data = select(sql4, param4)
+    if data[0][0] == account :
+        cun = int(input("请输入要存入的金额："))
+        sql5="update user set money = money+%s where account =%s "
+        param5=[cun,account]
+        update(sql5,param5)
+        sql6="select money from user where account=%s "
+        param6 = [account]
+        money=select(sql6, param6)
+        money1=money[0][0]
+        print("您的余额为：",money1)
     else:
         print("您输入的账号不存在")
 def qu_money():
-    account=int(input('请输入您账号：'))
-    if account in bank:
+    account = input("请输入您的账户")
+    sql4 = "select account,password,username,money from user where account =%s"
+    param4 = [account]
+    data = select(sql4, param4)
+    if data[0][0] == account :
         password=int(input('请输入密码：'))
-        if password == bank[account]['password']:
-            money=int(input('请输入取款金额：'))
-            if money <= int(bank[account]['money']):
-                bank[account]['money'] =bank[account]['money'] - money
+        if password ==data[0][1] :
+            money = int(input('请输入取款金额：'))
+            data1=float(data[0][3])
+            if money <= data1:
+                sql9="update user set money = money-%s where account =%s"
+                param9 = [money,account]
+                update(sql9, param9)
+                sql10 = "select money from user where account =%s"
+                param10 = [account]
+                data2 = select(sql10, param10)
                 info = '''
 -----------个人信息----------               
-用户名：%s
 账号：%s
+用户名：%s
 余额：%s
                 '''
-                print(info%(bank[account]['username'],account,bank[account]['money']))
+
+                print(info%(account,data[0][2],data2[0][0]))
             else:
                 print("余额不足")
         else:
             print("密码输入错误")
     else:
         print("密码输入错误")
-
 def zhuanz():
-    zhuanchu=int(input("请输入转出的账号"))
-    if zhuanchu in bank:
-        zhuanr=int(input("请输入转入的账号"))
-        if zhuanr in bank:
-            mima=int(input("请输入转出的密码"))
-            if mima==bank[zhuanchu]["password"]:
+    account = input("请输入转出的账号")
+    sql11 = "select account,password,username,money from user where account =%s"
+    param11 = [account]
+    data = select(sql11, param11)
+    if data[0][0] == account :
+        password = int(input('请输入密码：'))
+        if password == data[0][1]:
+            zhuanr = input("请输入转入的账号")
+            sql12 = "select account from user where account =%s"
+            param12 = [zhuanr]
+            data1 = select(sql12, param12)
+            if data1[0][0] == zhuanr :
                 zcje=int(input("请输入转出的金额"))
-                if zcje<=bank[zhuanchu]["money"]:
-                    bank[zhuanchu]["money"]=bank[zhuanchu]["money"]-zcje
-                    bank[zhuanr]["money"]=bank[zhuanr]["money"]+zcje
+                data2 = float(data[0][3])
+                if zcje<=data2:
+                    sql13 = "update user set money = money-%s where account =%s"
+                    param13 = [zcje, account]
+                    update(sql13, param13)
+                    sql14 = "update user set money = money+%s where account =%s"
+                    param14 = [zcje, zhuanr]
+                    update(sql14, param14)
+                    sql10 = "select money from user where account =%s"
+                    param10 = [account]
+                    data3 = select(sql10, param10)
                     info = '''
 -----------个人信息----------                    
-用户名：%s
 账号：%s
+用户名：%s
 余额：%s
 '''
-                    print(info % (bank[zhuanchu]['username'], zhuanchu , bank[zhuanchu]['money']))
+                    print(info%(account,data[0][2],data3[0][0]))
                 else:
                     print("您的余额不足！")
             else:
@@ -139,39 +160,27 @@ def zhuanz():
     else:
         print("您输入的转出账号不存在")
 def chaxun():
-    account=int(input("请输入您要查询的账号"))
-    if account in bank:
-        password=int(input("请输入您的密码"))
-        if password == bank[account]["password"]:
-            print("12121212")
-            info = '''
---------------以下是您的个人信息---------------
-用户名：%s
-账号：%s
-密码：%s
-余额：%s
-地址：
-   国家：%s
-   省份：%s
-   街道：%s
-   门牌号：%s
-开户行：%s
---------------------------------------------
-                       '''
-            print(info %(bank[account]["username"],account,password,bank[account]["money"],bank[account]["country"],
-                         bank[account]["province"],bank[account]["street"],bank[account]["tablet"],bank_name))
+    account = input("请输入您的账户")
+    sql4 = "select * from user where account =%s"
+    param4 = [account]
+    data = select(sql4, param4)
+    if data[0][0] == account:
+        password = int(input('请输入密码：'))
+        if password == data[0][2]:
+            print(data)
         else:
             print("您输入的密码错误")
 
     else:
         print("您输入的用户不存在")
+
 while True:
     welcome()
     chose = input("请输入您要办理的业务:")
     if chose == "1":
         useradd()
     elif chose == "2":
-        cunqian()
+        cun_money()
     elif chose == "3":
         qu_money()
     elif chose == "4":
