@@ -13,11 +13,11 @@ time.sleep(2)
 driver.find_element_by_xpath('//*[@id="iar1_sncaptcha_button"]/span').click()
 ac=ActionChains(driver)
 le=driver.find_element_by_xpath('/html/body/div[5]/div[2]/div[2]/div[2]/div/div[3]')
-# try:
-#     for i in range(170,185):
-#         ac.click_and_hold(le).move_by_offset(i,0).perform()
-#         ac.release()
-# except Exception:
-#     print("验证通过了")
-# finally:
-#     driver.find_element_by_xpath('//*[@id="submit"]').click()
+try:
+    for i in range(170,185):
+        ac.click_and_hold(le).move_by_offset(i,0).perform()
+        ac.release()
+except Exception:
+    print("验证通过了")
+finally:
+    driver.find_element_by_xpath('//*[@id="submit"]').click()
